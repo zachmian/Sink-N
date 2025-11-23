@@ -1,19 +1,29 @@
 <script setup>
-const slug = useRoute().query.slug
+const route = useRoute()
 
 const link = ref({})
 const id = computed(() => link.value.id)
 
 provide('id', id)
 
+const slug = computed(() => route.query.slug)
+
 async function getLink() {
-  const data = await useAPI('/api/link/query', {
-    query: {
-      slug,
-    },
-  })
-  // data.id = 'y1c4fhirl5'
-  link.value = data
+  if (!slug.value)
+    return
+
+  try {
+    const data = await useAPI('/api/link/query', {
+      query: {
+        slug: slug.value,
+      },
+    })
+    // data.id = 'y1c4fhirl5'
+    link.value = data
+  }
+  catch (error) {
+    link.value = {}
+  }
 }
 
 function updateLink(link, type) {
@@ -24,9 +34,9 @@ function updateLink(link, type) {
   }
 }
 
-onMounted(() => {
+watch(slug, () => {
   getLink()
-})
+}, { immediate: true })
 </script>
 
 <template>
